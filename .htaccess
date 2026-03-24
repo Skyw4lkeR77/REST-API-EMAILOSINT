@@ -1,0 +1,47 @@
+# ─────────────────────────────────────────────────────────────
+#  .htaccess for DirectAdmin (Apache) - Holehe OSINT REST API
+# ─────────────────────────────────────────────────────────────
+
+# Serve the app through Passenger WSGI
+PassengerEnabled On
+PassengerAppRoot /home/USERNAME/public_html/email-osint
+PassengerPython /home/USERNAME/virtualenv/email-osint/3.x/bin/python3
+
+# ─── URL Rewriting ───────────────────────────────────────────
+Options -MultiViews
+RewriteEngine On
+
+# If a real file or directory exists, serve it directly
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+
+# Forward everything else to Flask via Passenger
+RewriteRule ^(.*)$ /passenger_wsgi.py/$1 [QSA,L]
+
+# ─── Security Headers ────────────────────────────────────────
+<IfModule mod_headers.c>
+    Header always set X-Content-Type-Options "nosniff"
+    Header always set X-Frame-Options "DENY"
+    Header always set X-XSS-Protection "1; mode=block"
+    Header always set Referrer-Policy "strict-origin-when-cross-origin"
+    # CORS - restrict to your frontend domain in production:
+    # Header always set Access-Control-Allow-Origin "https://yourfrontend.com"
+    Header always set Access-Control-Allow-Origin "*"
+    Header always set Access-Control-Allow-Methods "GET, POST, OPTIONS"
+    Header always set Access-Control-Allow-Headers "Content-Type, X-API-Key, Authorization"
+</IfModule>
+
+# Handle OPTIONS preflight requests
+RewriteCond %{REQUEST_METHOD} OPTIONS
+RewriteRule ^(.*)$ $1 [R=200,L]
+
+# ─── Rate Limiting (optional, requires mod_ratelimit) ────────
+# <IfModule mod_ratelimit.c>
+#     SetOutputFilter RATE_LIMIT
+#     SetEnv rate-limit 400
+# </IfModule>
+
+# ─── Block sensitive files ───────────────────────────────────
+<FilesMatch "^(\.env|\.gitignore|setup\.py|requirements\.txt)$">
+    Require all denied
+</FilesMatch>

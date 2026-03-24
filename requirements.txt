@@ -1,0 +1,18 @@
+# Holehe OSINT REST API - Requirements
+# Install with: pip install -r requirements.txt
+
+# Core holehe deps
+termcolor==2.4.0
+beautifulsoup4==4.12.3
+httpx==0.27.0
+trio==0.25.1
+tqdm==4.66.4
+colorama==0.4.6
+
+# REST API
+flask==3.0.3
+flask-cors==4.0.1
+
+# Optional: production WSGI server (for DirectAdmin / cPanel)
+# passenger is provided by DirectAdmin, no install needed
+# gunicorn==22.0.0  # uncomment if running on a VPS with gunicorn
